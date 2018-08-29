@@ -40,6 +40,9 @@ public final class PlacesPullJob {
     public PlacesPullJob() {
     }
 
+    /**
+     * This method gets the places nearby
+     */
     public static void getNearByPlaces(Context context, String location) {
         mContext = context;
 
@@ -83,6 +86,9 @@ public final class PlacesPullJob {
 
     }
 
+    /**
+     * This method inserts the restaurant data
+     */
     public static void insertRestaurantData(List<Restaurant> restaurantList) {
         if (restaurantList != null && restaurantList.size() > 0) {
             Iterator<Restaurant> it = restaurantList.iterator();
@@ -121,71 +127,6 @@ public final class PlacesPullJob {
         }
 
     }
-
-
-    /*public static void retrievePlaceDetailsData() {
-        if (mRestaurantList != null) {
-            Iterator<Restaurant> it = mRestaurantList.iterator();
-            Restaurant restaurant = null;
-            mPlaceDtailsList = new ArrayList<PlaceDetails>();
-
-            ApiInterface apiService =
-                    ApiClient.getClient().create(ApiInterface.class);
-
-            while (it.hasNext()) {
-                restaurant = it.next();
-                if (restaurant != null) {
-                    String placeId = restaurant.getPlace_id();
-
-                    callDetails = apiService.restaurantDetails(placeId, mContext.getString(R.string.api_key));
-
-                    if (callDetails != null) {
-                        callDetails.enqueue(new retrofit2.Callback<PlaceDetailsResponse>() {
-                            @Override
-                            public void onResponse(Call<PlaceDetailsResponse> call, Response<PlaceDetailsResponse> response) {
-                                PlaceDetails placeDetails = response.body().getResult();
-                                if (placeDetails != null) {
-                                    mPlaceDtailsList.add(placeDetails);
-                                }
-                            }
-
-                            @Override
-                            public void onFailure(Call<PlaceDetailsResponse> call, Throwable t) {
-                                Log.e(LOG_TAG, t.toString());
-                            }
-                        });
-                    }
-
-
-                }
-            }
-        } else {
-            Log.e(LOG_TAG, "Failed to retrieve place details");
-        }
-
-    }
-
-    public static void insertPlaceDetails() {
-        if (mPlaceDtailsList != null) {
-            Iterator<PlaceDetails> iterator = mPlaceDtailsList.iterator();
-
-            PlaceDetails place = null;
-
-            while (iterator.hasNext()) {
-                place = iterator.next();
-
-                Log.i(LOG_TAG, place.getFormatted_address());
-                Log.i(LOG_TAG, place.getFormatted_phone_number());
-                Log.i(LOG_TAG, place.getPlace_id());
-                Log.i(LOG_TAG, place.getWebsite());
-
-                RestaurantTimings restaurantTimings = place.getOpening_hours();
-                Log.i(LOG_TAG, String.valueOf(restaurantTimings.isOpen_now()));
-                Log.i(LOG_TAG, restaurantTimings.getWeekday_text().toString());
-
-            }
-        }
-    }*/
 
     public static void insertReviews() {
 

@@ -18,12 +18,14 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.support.v7.app.ActionBar;
 
 import android.widget.TextView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import android.content.IntentSender;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -54,12 +56,15 @@ public class MainActivity extends AppCompatActivity
     private static final String DETAILFRAGMENT_TAG = "DFTAG";
 
     private static final int MY_FINE_LOCATION_PERMISSION_REQUEST_CODE = 101;
+    private final static int CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
         ButterKnife.bind(this);
         if (savedInstanceState == null) {
             if (isOnline()) {
@@ -123,7 +128,6 @@ public class MainActivity extends AppCompatActivity
         return networkInfo != null && networkInfo.isConnectedOrConnecting();
     }
 
-
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         Log.i(LOG_TAG, "Google Play Services Connection Successfull");
@@ -131,11 +135,15 @@ public class MainActivity extends AppCompatActivity
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             location = LocationServices.FusedLocationApi.getLastLocation(myApiClient);
-
-
+            // need to check whether location is null!
             if (location != null) {
+                // Good! handle new location
                latitudeGPS = location.getLatitude();
                longitudeGPS = location.getLongitude();
+            }
+            else {
+                // Error! Location is null!
+                Log.e(LOG_TAG, "Error occured! Location is null!");
             }
 
             if (latitudeGPS != 0.0 && longitudeGPS != 0.0) {
@@ -146,10 +154,11 @@ public class MainActivity extends AppCompatActivity
                 Log.i(LOG_TAG, "Current location" + location);
                 this.startService(intent);
             } else {
-                Log.e(LOG_TAG, "Error occured ! Cannot retrieve current location");
+                Log.e(LOG_TAG, "Error occured! Cannot retrieve current location");
             }
 
         } else {
+            // if no permission request it
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     MY_FINE_LOCATION_PERMISSION_REQUEST_CODE);
@@ -157,10 +166,26 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Log.i(LOG_TAG, "Connection failed " + connectionResult.getErrorMessage());
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        /* Google Play services can resolve some errors it detects.
+         * If the error has a resolution, try sending an Intent to
+         * start a Google Play services activity that can resolve
+         * error. */
+        if (connectionResult.hasResolution()) {
+            try {
+                // Start an Activity that tries to resolve the error
+                connectionResult.startResolutionForResult(this, CONNECTION_FAILURE_RESOLUTION_REQUEST);
+                // Thrown if Google Play services canceled the original PendingIntent
+            } catch (IntentSender.SendIntentException e) {
+                // Log the error
+                e.printStackTrace();
+            }
+        } else {
+            /* If no resolution is available, display a dialog to the
+             * user with the error. */
+            Log.i(LOG_TAG, "Location services connection failed with code " + connectionResult.getErrorCode());
+        }
     }
-
 
     @Override
     public void onConnectionSuspended(int i) {
