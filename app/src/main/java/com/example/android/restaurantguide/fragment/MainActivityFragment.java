@@ -9,7 +9,9 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,13 +30,12 @@ public class MainActivityFragment extends Fragment
     }
 
     RecyclerView mRecyclerView;
-    RecyclerView.LayoutManager mLinearLayoutManager;
     RecyclerView.LayoutManager mGridLayoutManager;
-    private static final int MY_LOADER_ID = 0;
     private final int COLUMN_COUNT = 2;
+    private static final String LOG_TAG = "MAIN_ACTIVITY_FRAGMENT";
     Cursor mCursor;
     MainActivityFragment mainActivityFragment;
-
+    public int position;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -49,6 +50,13 @@ public class MainActivityFragment extends Fragment
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         getLoaderManager().initLoader(0, null, this);
+        if (savedInstanceState != null) {
+            // Restore last state for position
+            position = savedInstanceState.getInt("position", 0);
+            Log.i(LOG_TAG, "On activity created: "+position);
+            //((LinearLayoutManager) mRecyclerView.getLayoutManager()).scrollToPositionWithOffset(position,0);
+            mRecyclerView.scrollToPosition(position);
+        }
     }
 
     @Override
@@ -71,7 +79,6 @@ public class MainActivityFragment extends Fragment
 
         RestaurantListAdapter adapter = new RestaurantListAdapter(data, getActivity(), mainActivityFragment);
         mRecyclerView.setAdapter(adapter);
-        //layoutManager= new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL , false);
         mGridLayoutManager = new GridLayoutManager(getActivity(), COLUMN_COUNT);
         mRecyclerView.setLayoutManager(mGridLayoutManager);
         mCursor = data;
@@ -81,6 +88,7 @@ public class MainActivityFragment extends Fragment
     public void onLoaderReset(Loader<Cursor> loader) {
         mRecyclerView.setAdapter(null);
     }
+
 
     @Override
     public void onItemClick(View view, int pos) {
@@ -94,4 +102,33 @@ public class MainActivityFragment extends Fragment
     public interface Callback {
         public void onItemSelected(String placeId);
     }
+
+
+    /*
+     * Save the scroll position
+     */
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        // Save UI state changes to the savedInstanceState.
+        // This bundle will be passed to onCreate if the process is
+        // killed and restarted.
+        //position = ((LinearLayoutManager)mRecyclerView.getLayoutManager()).findFirstCompletelyVisibleItemPosition();
+        position = ((LinearLayoutManager)mRecyclerView.getLayoutManager()).findFirstVisibleItemPosition();
+        savedInstanceState.putInt("position", position);
+        Log.i(LOG_TAG, "Save position: "+position);
+    }
+
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (position != 0) {
+            Log.i(LOG_TAG, "On resume: "+position);
+            ((LinearLayoutManager) mRecyclerView.getLayoutManager()).scrollToPositionWithOffset(position,0);
+
+        }
+    }
+
 }

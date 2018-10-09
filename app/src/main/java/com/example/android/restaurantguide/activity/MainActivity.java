@@ -18,7 +18,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.support.v7.app.ActionBar;
 
 import android.widget.TextView;
 import android.view.Menu;
@@ -51,7 +50,7 @@ public class MainActivity extends AppCompatActivity
     private boolean mTwoPane = false;
     @BindView(R.id.error)
     TextView errorTextview;
-    private static final int REQUEST_ERROR = 1001;
+    //private static final int REQUEST_ERROR = 1001;
     private static final String LOG_TAG = "MAIN_ACTIVITY";
     private static final String DETAILFRAGMENT_TAG = "DFTAG";
 
@@ -67,8 +66,9 @@ public class MainActivity extends AppCompatActivity
 
         ButterKnife.bind(this);
         if (savedInstanceState == null) {
+            // there is no previous saved state
             if (isOnline()) {
-                // network is avalable
+                // network is available
                 Log.i(LOG_TAG, "network is available");
                 if (CheckGooglePlayServices()) {
                     if (myApiClient == null) {
@@ -151,14 +151,14 @@ public class MainActivity extends AppCompatActivity
 
                 intent = new Intent(this, PlacesPullIntentService.class);
                 intent.putExtra("current_location", location);
-                Log.i(LOG_TAG, "Current location" + location);
+                Log.i(LOG_TAG, "Current location: " + location);
                 this.startService(intent);
             } else {
                 Log.e(LOG_TAG, "Error occured! Cannot retrieve current location");
             }
 
         } else {
-            // if no permission request it
+            // if no permission then request it
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     MY_FINE_LOCATION_PERMISSION_REQUEST_CODE);
@@ -273,4 +273,6 @@ public class MainActivity extends AppCompatActivity
             startActivity(detailsIntent);
         }
     }
+
+
 }

@@ -35,7 +35,7 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyDOapXv5UjcY5URBSuBjAl2jbJk8RULQWY" />
+            android:value="@string/api_key" />
 
         <provider
             android:authorities="com.example.android.restaurantguide.app"
